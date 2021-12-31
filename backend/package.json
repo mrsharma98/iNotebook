@@ -1,5 +1,5 @@
 {
-  "name": "inotebook",
+  "name": "inotebook-backend",
   "version": "1.0.0",
   "description": "iNotebook - Notebook for you.",
   "main": "index.js",
@@ -10,6 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.17.2",
+    "express-validator": "^6.14.0",
     "mongoose": "^6.1.4"
-  }
+  },
+  "devDependencies": {}
 }
