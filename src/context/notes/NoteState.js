@@ -3,43 +3,89 @@ import NoteContext from "./noteContext";
 
 const NoteState = (props) => {
 
-  const notesInitial = [
-    {
-      _id: 1,
-      title: "First",
-      descriptio: "This is the first note"
-    },
-    {
-      _id: 2,
-      title: "Second",
-      descriptio: "This is the Second note"
-    },
-    {
-      _id: 3,
-      title: "Third",
-      descriptio: "This is the Third note"
-    },
-    {
-      _id: 4,
-      title: "Fourth",
-      descriptio: "This is the Fourth note"
-    },
-    {
-      _id: 5,
-      title: "Fifth",
-      descriptio: "This is the Fifth note"
-    },
-    {
-      _id: 6,
-      title: "Sixth",
-      descriptio: "This is the Sixth note"
-    },
-  ]
+  const host = 'http://localhost:5000'
+
+  const notesInitial = []
 
   const [notes, setNotes] = useState(notesInitial)
 
+  // Gett all notes
+  const getNotes = async () => {
+
+    const response = await fetch(`${host}/api/notes/fetchallnotes`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': ''
+      }
+    })
+
+    const notes = await response.json()
+    setNotes(notes)
+  }
+
+  //  Add a note
+  const addNote = async ({ title, description, tag }) => {
+
+    const response = await fetch(`${host}/api/notes/addnote`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': ''
+      },
+      body: JSON.stringify({ title, description, tag })
+    })
+
+    const note = await response.json()
+    setNotes([...notes, note])
+  }
+
+  // Delete a note
+  const deleteNote = async (id) => {
+
+    const response = await fetch(`${host}/api/notes/deletenote/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': ''
+      }
+    })
+
+    const json = await response.json()
+    const newNotes = notes.filter((note) => note._id !== id)
+    setNotes(newNotes)
+  }
+
+  // Edit a note
+  const editNote = async (id, title, description, tag) => {
+
+    const response = await fetch(`${host}/api/notes/updatenote/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'auth-token': ''
+      },
+      body: JSON.stringify({ title, description, tag })
+    })
+
+    const json = await response.json()
+
+    let newNotes = [...notes]
+    for (let index = 0; index < newNotes.length; index++) {
+      const element = newNotes[index]
+      if (element._id === id) {
+        newNotes[index].title = title
+        newNotes[index].description = description
+        newNotes[index].tag = tag
+        break
+      }
+    }
+
+    setNotes(newNotes)
+  }
+
   return (
-    <NoteContext.Provider value={{ notes, setNotes }}>
+    <NoteContext.Provider value={{ notes, addNote, deleteNote, editNote, getNotes }}>
       {props.children}
     </NoteContext.Provider>
   )
