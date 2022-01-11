@@ -16,10 +16,11 @@ router.post('/createuser', [
   body('password', 'Password must be atleast 5 characters').isLength({ min: 5 })
 ], async (req, res) => {
 
+  let success = false
   // If error -- return bad req and errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ success, errors: errors.array() });
   }
 
   try {
@@ -27,7 +28,7 @@ router.post('/createuser', [
     let user = await User.findOne({ email: req.body.email })
 
     if (user) {
-      return res.status(400).json({ error: "Sorry with this email already exist" })
+      return res.status(400).json({ success, error: "Sorry with this email already exist" })
     }
 
     // Salt of 10 char
@@ -51,7 +52,8 @@ router.post('/createuser', [
     const authToken = jwt.sign(data, JWT_SECRET)
 
     // res.json(user)
-    res.json({ authToken: authToken })
+    success = true
+    res.json({ success, authToken: authToken })
 
   } catch (error) {
     // console.error(error.message);
@@ -100,7 +102,7 @@ router.post("/login", [
 
   } catch (error) {
     console.error(error.message);
-    res.status(400).send("Internal Server Error")
+    res.status(500).send("Internal Server Error")
   }
 })
 
@@ -108,7 +110,7 @@ router.post("/login", [
 // Get loggedin user details using POST "/api/auth/getuser" -- Login required
 router.post("/getuser", fetchuser, async (req, res) => {
   try {
-    userId = req.user.id
+    let userId = req.user.id
     const user = await User.findById(userId).select("-password")
     res.send(user)
   } catch (error) {
